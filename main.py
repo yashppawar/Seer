@@ -7,10 +7,11 @@ import requests
 from pathlib import Path
 from tqdm import tqdm
 
+ENGINE = pyttsx3.init()
+
 def say(out_say):
-    engine = pyttsx3.init()
-    engine.say(out_say)
-    engine.runAndWait()
+    ENGINE.say(out_say)
+    ENGINE.runAndWait()
 
 def download_file(filename, url):
 	chunkSize = 1024
