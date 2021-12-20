@@ -3,9 +3,36 @@ import time
 import cv2 
 import pyttsx3
 import keyboard
+import requests
+from pathlib import Path
+from tqdm import tqdm
+
+def say(out_say):
+    engine = pyttsx3.init()
+    engine.say(out_say)
+    engine.runAndWait()
+
+def download_file(filename, url):
+	chunkSize = 1024
+	r = requests.get(url, stream=True)
+
+	with open(filename, 'wb') as f:
+		pbar = tqdm(unit="B", total=int(r.headers['Content-Length']))
+
+		for chunk in r.iter_content(chunk_size=chunkSize):
+			if chunk: # filter out keep-alive new chunks
+				pbar.update(len(chunk))
+
+				f.write(chunk)
+
+	return filename
 
 # load the COCO class labels our YOLO model was trained on
 LABELS = open("coco.names").read().strip().split("\n")
+
+
+if not Path('yolov3.weights').is_file():
+	download_file("yolov3.weights", "https://pjreddie.com/media/files/yolov3.weights")
 
 # load our YOLO object detector trained on COCO dataset (80 classes)
 print("[INFO] loading YOLO from disk...")
@@ -22,11 +49,6 @@ frame_count = 0
 start = time.time()
 first = True
 frames = []
-
-def say(out_say):
-    engine = pyttsx3.init()
-    engine.say(out_say)
-    engine.runAndWait()
 
 while True:
 	frame_count += 1
